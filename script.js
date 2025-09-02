@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const table = document.getElementById("pbb-table");
 
   // GANTI DENGAN URL WEB APP ANDA
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyLgXUktXvqvYQfiexrDI7_7nZVWCxzBy3nJGP74HhNUOaAaMBLx9WKwlZZ_aByfRsrVQ/exec";
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxZsWerzm0vm_jCo2-FyqqaJYUvwNSryYtY03d0UUDPktf8jUO2CFdv7GQavjubBffwVQ/exec";
 
   fetch(WEB_APP_URL)
     .then(res => res.json())
@@ -54,4 +54,5 @@ function formatDate(dateStr) {
   if (!dateStr) return "-";
   const date = new Date(dateStr);
   return isNaN(date) ? dateStr : date.toLocaleDateString("id-ID");
+
 }
