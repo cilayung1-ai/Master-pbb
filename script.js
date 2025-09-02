@@ -6,63 +6,72 @@ document.addEventListener("DOMContentLoaded", function () {
   const errorDiv = document.getElementById("error");
   const table = document.getElementById("pbb-table");
 
+  // Tampilkan pesan info
+  loading.textContent = "Menghubungkan ke server...";
+
   fetch(WEB_APP_URL)
     .then(response => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return response.json();
+      return response.text();
     })
-    .then(json => {
-      // Periksa apakah ada error
-      if (json.status === "error") {
-        throw new Error(json.message || "Terjadi kesalahan pada server");
+    .then(text => {
+      try {
+        const json = JSON.parse(text);
+        
+        // Periksa apakah ada error
+        if (json.status === "error") {
+          throw new Error(json.message);
+        }
+
+        // Pastikan data valid
+        if (!json.data || !Array.isArray(json.data)) {
+          throw new Error("Format data tidak valid. Pastikan GAS tidak error.");
+        }
+
+        // Bersihkan tabel sebelum memasukkan data baru
+        tableBody.innerHTML = "";
+
+        json.data.forEach((row) => {
+          // Normalisasi kolom dan tangani nilai null
+          const normalizedRow = {
+            NOP: row.NOP || "-",
+            Nama_WP: row.Nama_WP || "-",
+            Alamat_WP: row.Alamat_WP || "-",
+            Alamat_Objek: row.Alamat_Objek || "-",
+            Pokok_PBB: row.Pokok_PBB || 0,
+            Status: row.Status || "-",
+            Tanggal_Bayar: row.Tanggal_Bayar || "-",
+            Pemilik: row.Pemilik || "-",
+            Kolektor: row.Kolektor || "-",
+            Validasi: row.Validasi || "-",
+            KET: row.KET || "-"
+          };
+
+          // Buat baris tabel
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${normalizedRow.NOP}</td>
+            <td>${normalizedRow.Nama_WP}</td>
+            <td>${normalizedRow.Alamat_WP}</td>
+            <td>${normalizedRow.Alamat_Objek}</td>
+            <td class="num">${formatRupiah(normalizedRow.Pokok_PBB)}</td>
+            <td><span class="status ${normalizedRow.Status.toLowerCase()}">${normalizedRow.Status}</span></td>
+            <td>${formatDate(normalizedRow.Tanggal_Bayar)}</td>
+            <td>${normalizedRow.Pemilik}</td>
+            <td>${normalizedRow.Kolektor}</td>
+            <td>${normalizedRow.Validasi}</td>
+            <td>${normalizedRow.KET}</td>
+          `;
+          tableBody.appendChild(tr);
+        });
+
+        loading.style.display = "none";
+        table.style.display = "table";
+      } catch (parseError) {
+        throw new Error("GAS Error: " + text.substring(0, 200));
       }
-
-      // Pastikan data valid
-      if (!json.data || !Array.isArray(json.data)) {
-        throw new Error("Format data tidak valid. Pastikan GAS tidak error.");
-      }
-
-      // Bersihkan tabel sebelum memasukkan data baru
-      tableBody.innerHTML = "";
-
-      json.data.forEach((row) => {
-        // Normalisasi kolom dan tangani nilai null
-        const normalizedRow = {
-          NOP: row.NOP || "-",
-          Nama_WP: row.Nama_WP || "-",
-          Alamat_WP: row.Alamat_WP || "-",
-          Alamat_Objek: row.Alamat_Objek || "-",
-          Pokok_PBB: row.Pokok_PBB || 0,
-          Status: row.Status || "-",
-          Tanggal_Bayar: row.Tanggal_Bayar || "-",
-          Pemilik: row.Pemilik || "-",
-          Kolektor: row.Kolektor || "-",
-          Validasi: row.Validasi || "-",
-          KET: row.KET || "-"
-        };
-
-        // Buat baris tabel
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${normalizedRow.NOP}</td>
-          <td>${normalizedRow.Nama_WP}</td>
-          <td>${normalizedRow.Alamat_WP}</td>
-          <td>${normalizedRow.Alamat_Objek}</td>
-          <td class="num">${formatRupiah(normalizedRow.Pokok_PBB)}</td>
-          <td><span class="status ${normalizedRow.Status.toLowerCase()}">${normalizedRow.Status}</span></td>
-          <td>${formatDate(normalizedRow.Tanggal_Bayar)}</td>
-          <td>${normalizedRow.Pemilik}</td>
-          <td>${normalizedRow.Kolektor}</td>
-          <td>${normalizedRow.Validasi}</td>
-          <td>${normalizedRow.KET}</td>
-        `;
-        tableBody.appendChild(tr);
-      });
-
-      loading.style.display = "none";
-      table.style.display = "table";
     })
     .catch((err) => {
       loading.style.display = "none";
