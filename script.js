@@ -1,4 +1,4 @@
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxOsVimCrZn1hMsnkjYVwsiLcy5blJd81-wCXer3HUsy23RH3J_eN6gMemwD5a78NOOmg/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxZsWerzm0vm_jCo2-FyqqaJYUvwNSryYtY03d0UUDPktf8jUO2CFdv7GQavjubBffwVQ/exec";
 
 document.addEventListener("DOMContentLoaded", function () {
   const tableBody = document.getElementById("table-body");
@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const errorDiv = document.getElementById("error");
   const table = document.getElementById("pbb-table");
 
-  // Tampilkan pesan info
   loading.textContent = "Menghubungkan ke server...";
 
   fetch(WEB_APP_URL)
@@ -22,7 +21,35 @@ document.addEventListener("DOMContentLoaded", function () {
         
         // Periksa apakah ada error
         if (json.status === "error") {
-          throw new Error(json.message);
+          // Tampilkan pesan bantuan spesifik
+          if (json.message.includes("belum login")) {
+            errorDiv.innerHTML = `
+              <strong>❌ Akses ditolak: Anda belum login dengan akun Google</strong><br><br>
+              <ol>
+                <li>➡️ Buka <a href="https://accounts.google.com" target="_blank">akun Google Anda</a></li>
+                <li>➡️ Login dengan akun yang memiliki akses (contoh: admin@desa.id)</li>
+                <li>➡️ Pastikan akun tersebut ada di daftar REQUIRED_EMAILS di Code.gs</li>
+                <li>➡️ Buka kembali halaman ini</li>
+              </ol>
+            `;
+          } else if (json.message.includes("Email Anda: ")) {
+            errorDiv.innerHTML = `
+              <strong>❌ Akses ditolak: Email tidak terdaftar</strong><br><br>
+              <ol>
+                <li>➡️ Buka Google Sheets Anda</li>
+                <li>➡️ Klik menu: 📘 PBB API → Check My Email</li>
+                <li>➡️ Lihat email yang muncul</li>
+                <li>➡️ Tambahkan email tersebut ke REQUIRED_EMAILS di Code.gs</li>
+                <li>➡️ Deploy ulang Web App</li>
+              </ol>
+            `;
+          } else {
+            throw new Error(json.message);
+          }
+          
+          errorDiv.style.display = "block";
+          loading.style.display = "none";
+          return;
         }
 
         // Pastikan data valid
@@ -78,6 +105,20 @@ document.addEventListener("DOMContentLoaded", function () {
       errorDiv.style.display = "block";
       errorDiv.textContent = "GAGAL MEMUAT DATA: " + err.message;
       console.error("Error fetching ", err);
+      
+      // Tampilkan pesan bantuan spesifik
+      if (err.message.includes("Email Anda: ")) {
+        errorDiv.innerHTML = `
+          <strong>❌ Akses ditolak: Email tidak terdaftar</strong><br><br>
+          <ol>
+            <li>➡️ Buka Google Sheets Anda</li>
+            <li>➡️ Klik menu: 📘 PBB API → Check My Email</li>
+            <li>➡️ Lihat email yang muncul</li>
+            <li>➡️ Tambahkan email tersebut ke REQUIRED_EMAILS di Code.gs</li>
+            <li>➡️ Deploy ulang Web App</li>
+          </ol>
+        `;
+      }
     });
 });
 
