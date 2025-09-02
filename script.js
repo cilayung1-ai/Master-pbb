@@ -1,5 +1,4 @@
-
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxZsWerzm0vm_jCo2-FyqqaJYUvwNSryYtY03d0UUDPktf8jUO2CFdv7GQavjubBffwVQ/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxZsWerzm0vm_jCo2-FyqqaJYUvwNSryYtY03d0UUDPktf8jUO2CFdv7GQavjubBffwVQ/exec";
 
 document.addEventListener("DOMContentLoaded", function () {
   const tableBody = document.getElementById("table-body");
@@ -8,10 +7,21 @@ document.addEventListener("DOMContentLoaded", function () {
   const table = document.getElementById("pbb-table");
 
   fetch(WEB_APP_URL)
-    .then((res) => res.json())
-    .then((json) => {
-      if (!json || !json.data) {
-        throw new Error("Data tidak valid atau kosong");
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(json => {
+      // Periksa apakah ada error
+      if (json.status === "error") {
+        throw new Error(json.message || "Terjadi kesalahan pada server");
+      }
+
+      // Pastikan data valid
+      if (!json.data || !Array.isArray(json.data)) {
+        throw new Error("Format data tidak valid. Pastikan GAS tidak error.");
       }
 
       // Bersihkan tabel sebelum memasukkan data baru
@@ -26,11 +36,11 @@ document.addEventListener("DOMContentLoaded", function () {
           Alamat_Objek: row.Alamat_Objek || "-",
           Pokok_PBB: row.Pokok_PBB || 0,
           Status: row.Status || "-",
-          Tanggal_Bayar: row.Tanggal_Bayar ? new Date(row.Tanggal_Bayar).toLocaleDateString("id-ID") : "-",
+          Tanggal_Bayar: row.Tanggal_Bayar || "-",
           Pemilik: row.Pemilik || "-",
           Kolektor: row.Kolektor || "-",
           Validasi: row.Validasi || "-",
-          Keterangan: row.Keterangan || "-"
+          KET: row.KET || "-"
         };
 
         // Buat baris tabel
@@ -42,11 +52,11 @@ document.addEventListener("DOMContentLoaded", function () {
           <td>${normalizedRow.Alamat_Objek}</td>
           <td class="num">${formatRupiah(normalizedRow.Pokok_PBB)}</td>
           <td><span class="status ${normalizedRow.Status.toLowerCase()}">${normalizedRow.Status}</span></td>
-          <td>${normalizedRow.Tanggal_Bayar}</td>
+          <td>${formatDate(normalizedRow.Tanggal_Bayar)}</td>
           <td>${normalizedRow.Pemilik}</td>
           <td>${normalizedRow.Kolektor}</td>
           <td>${normalizedRow.Validasi}</td>
-          <td>${normalizedRow.Keterangan}</td>
+          <td>${normalizedRow.KET}</td>
         `;
         tableBody.appendChild(tr);
       });
@@ -57,15 +67,38 @@ document.addEventListener("DOMContentLoaded", function () {
     .catch((err) => {
       loading.style.display = "none";
       errorDiv.style.display = "block";
-      errorDiv.textContent = "Error: " + err.message;
-      console.error("Error fetching data:", err);
+      errorDiv.textContent = "GAGAL MEMUAT DATA: " + err.message;
+      console.error("Error fetching ", err);
     });
 });
 
 function formatRupiah(num) {
+  // Pastikan num adalah angka
+  const value = typeof num === 'number' ? num : parseFloat(num) || 0;
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
     minimumFractionDigits: 0,
-  }).format(num);
+  }).format(value);
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return "-";
+  
+  try {
+    // Coba sebagai timestamp
+    if (!isNaN(Date.parse(dateStr))) {
+      return new Date(dateStr).toLocaleDateString("id-ID");
+    }
+    
+    // Coba sebagai format spreadsheet
+    if (typeof dateStr === 'number') {
+      const date = new Date((dateStr - (25567 + 2)) * 86400 * 1000);
+      return date.toLocaleDateString("id-ID");
+    }
+    
+    return dateStr;
+  } catch (e) {
+    return dateStr;
+  }
 }
