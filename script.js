@@ -1,4 +1,4 @@
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxZsWerzm0vm_jCo2-FyqqaJYUvwNSryYtY03d0UUDPktf8jUO2CFdv7GQavjubBffwVQ/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxOsVimCrZn1hMsnkjYVwsiLcy5blJd81-wCXer3HUsy23RH3J_eN6gMemwD5a78NOOmg/exec";
 
 document.addEventListener("DOMContentLoaded", function () {
   const tableBody = document.getElementById("table-body");
