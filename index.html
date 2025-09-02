@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard PBB</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Dashboard Pembayaran PBB</h1>
+    <p id="loading">Memuat data...</p>
+    <table id="pbb-table" class="data-table" style="display:none;">
+      <thead>
+        <tr>
+          <th>NOP</th>
+          <th>Nama WP</th>
+          <th>Alamat WP</th>
+          <th>Alamat Objek</th>
+          <th>Pokok PBB (Rp)</th>
+          <th>Status</th>
+          <th>Tanggal Bayar</th>
+          <th>Pemilik</th>
+          <th>Kolektor</th>
+          <th>Validasi</th>
+          <th>Keterangan</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+    <p id="error" style="color: red; display: none;"></p>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
